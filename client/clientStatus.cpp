@@ -9,13 +9,15 @@ clientStatus::clientStatus() {
 }
 
 bool clientStatus::setIpAndHost(const char *ip, int port) {
-    if(inet_pton(AF_INET,ip,&serverAddr.sin_addr)<0){
+    const char *defaultIP = "127.0.0.1";
+
+    if(inet_pton(AF_INET,defaultIP,&serverAddr.sin_addr)<=0){
         return false;
     }
     if(port<0||port>65535){
         return false;
     }
-    serverAddr.sin_port= htons(PORT);
+    serverAddr.sin_port= htons(port);
     return true;
 }
 
@@ -38,3 +40,12 @@ void clientStatus::printNowStatus() {
     return;
 }
 
+void clientStatus::Lock(){
+    csMutex.lock();
+    return;
+}
+
+void clientStatus::unLock() {
+    csMutex.unlock();
+    return;
+}

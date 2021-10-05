@@ -5,6 +5,7 @@
 #ifndef COMPUTERNETWORK_LAB_DATA_H
 #define COMPUTERNETWORK_LAB_DATA_H
 
+#include "clientStatus.h"
 // all this data are initial in client.cpp
 //recvTid is the thread to receive
 extern pthread_t recvTid;

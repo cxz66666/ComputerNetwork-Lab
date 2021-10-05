@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 using namespace std;
+void printHelp();
+void printWelcome();
 void handleConnect(vector<string>&commands);
 void handleDisConnect(vector<string>&commands);
 void handleTime(vector<string>&commands);
