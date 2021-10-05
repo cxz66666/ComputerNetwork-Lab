@@ -50,3 +50,11 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+.idea/
+
+
+cmake-build-debug/
+
+server/cmake-build-debug
+client/cmake-build-debug
