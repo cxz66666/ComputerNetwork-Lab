@@ -24,7 +24,7 @@ const int PORT=4611;
 const string SERVERNAME="raynor-HP";
 //BACKLOG is the max number of queue
 const int BACKLOG=40;
-const int MAXLINE=2048;
+const int MAXLINE=1024;
 
 
 const string CONNECT="connect";
@@ -44,9 +44,11 @@ const int CONNECTNUMBER=1;
 const int DISCONNECTNUMBER=2;
 const int TIMENUMBER=3;
 const int NAMENUMBER=4;
-const int LISTENNUMBER=5;
+const int LISTNUMBER=5;
 const int SENDNUMER=6;
 const int EXITNUMBER=7;
 
+const string STOPFLAG="==+==";
+const int STOPLENGTH=STOPFLAG.size();
 
 #endif //COMPUTERNETWORK_LAB_CONFIG_H

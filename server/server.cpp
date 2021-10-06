@@ -48,7 +48,7 @@ int main(){
             perror("pthread create error.\n");
             ss->closeConnect(connFd);
             ss->unLock();
-            exit(1);
+            continue;
         }//if
     }
 }

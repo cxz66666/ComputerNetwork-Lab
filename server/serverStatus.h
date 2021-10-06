@@ -24,6 +24,7 @@ public:
 
     //toString return a string contains all the information
     string toString();
+    string print();
 };
 
 //表示server的状态结构体

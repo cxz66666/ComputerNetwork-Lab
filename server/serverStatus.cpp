@@ -21,6 +21,11 @@ string connectStatus::toString() {
     return ss.str();
 }
 
+string connectStatus::print() {
+    char tmp[100];
+    sprintf(tmp,"%s:%04d, connectFd is %d",ip.c_str(),port,connFd);
+    return string(tmp);
+}
 
 
 serverStatus::serverStatus() {}

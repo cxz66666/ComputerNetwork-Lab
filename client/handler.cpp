@@ -6,7 +6,7 @@
 #include "data.h"
 #include "recevice.h"
 #include "../config.h"
-
+#include "util.h"
 
 
 
@@ -47,6 +47,14 @@ void handleConnect(vector<string>&commands){
         return;
     }
     cs->Lock();
+
+    //already connected
+    if(cs->hasConnected()){
+        printf("[client] already connect!\n");
+        cs->unLock();
+        return;
+    }
+
     //ip or port error
     if(!cs->setIpAndHost(commands[1].c_str(),port)){
         cs->init();
@@ -107,13 +115,61 @@ void handleDisConnect(vector<string>&commands){
     return;
 }
 void handleTime(vector<string>&commands){
+    if(commands.size()>1){
+        printInlegalParam(TIME.c_str(),1,commands.size());
+        return;
+    }
+    cs->Lock();
+    if(!cs->hasConnected()){
+        printf("[client] don't connect yet!\n");
+        cs->unLock();
+        return;
+    }
+    string sendStr=int2string(TIMENUMBER);
+    sendStr+=STOPFLAG;
 
+    send(sockFd,sendStr.c_str(), sendStr.size(),0);
+
+    cs->unLock();
+    return;
 }
 void handleName(vector<string>&commands){
+    if(commands.size()>1){
+        printInlegalParam(NAME.c_str(),1,commands.size());
+        return;
+    }
+    cs->Lock();
+    if(!cs->hasConnected()){
+        printf("[client] don't connect yet!\n");
+        cs->unLock();
+        return;
+    }
+    string sendStr=int2string(NAMENUMBER);
+    sendStr+=STOPFLAG;
 
+    send(sockFd,sendStr.c_str(), sendStr.size(),0);
+
+    cs->unLock();
+    return;
 }
 void handleList(vector<string>&commands){
+    if(commands.size()>1){
+        printInlegalParam(LIST.c_str(),1,commands.size());
+        return;
+    }
+    cs->Lock();
+    if(!cs->hasConnected()){
+        printf("[client] don't connect yet!\n");
+        cs->unLock();
+        return;
+    }
+    string sendStr=int2string(NAMENUMBER);
+    sendStr+=STOPFLAG;
 
+    send(sockFd,sendStr.c_str(), sendStr.size(),0);
+
+    cs->unLock();
+    return;
 }
 void handleSend(vector<string>&commands){
 
