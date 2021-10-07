@@ -53,8 +53,8 @@ dkms.conf
 
 .idea/
 
-
-cmake-build-debug/
+cmake-build-debug/*
+!cmake-build-debug/readme.md
 
 server/cmake-build-debug
 client/cmake-build-debug

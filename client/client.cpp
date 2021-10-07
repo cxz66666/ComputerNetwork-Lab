@@ -6,8 +6,7 @@
 #include "./recevice.h"
 #include "./handler.h"
 #include "./data.h"
-//输入需要加上ip地址参数
-//usage: ./client 127.0.0.1
+
 
 
 

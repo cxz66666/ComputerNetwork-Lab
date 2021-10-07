@@ -12,7 +12,7 @@ clientStatus::clientStatus() {
 bool clientStatus::setIpAndHost(const char *ip, int port) {
     const char *defaultIP = "127.0.0.1";
 
-    if(inet_pton(AF_INET,defaultIP,&serverAddr.sin_addr)<=0){
+    if(inet_pton(AF_INET,ip,&serverAddr.sin_addr)<=0){
         return false;
     }
     if(port<0||port>65535){
