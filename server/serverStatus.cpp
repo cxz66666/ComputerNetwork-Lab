@@ -47,7 +47,7 @@ void serverStatus::unLock() {
 
 void serverStatus::closeConnect(int connFd) {
     if(ss.count(connFd)){
-        char *msg="connect closed by server\n";
+        char *msg="isConnect closed by server\n";
         send(connFd,msg, strlen(msg),0);
         close(connFd);
         connectStatus *cs=ss[connFd];

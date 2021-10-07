@@ -3,27 +3,15 @@
 //
 
 #include "../config.h"
-#include "./recevice.h"
 #include "./handler.h"
 #include "./data.h"
-
-
-
-
-
-
-//recvTid is the thread to receive
-pthread_t recvTid=-1;
-
-//sockFd is the client socket number
-int sockFd=-1;
 
 struct clientStatus* cs= nullptr;
 
 
 int main(int argc, char **argv){
-    cs=new clientStatus();
 
+    cs=new clientStatus();
     printWelcome();
 
     vector<string>tmpCommands;
@@ -40,7 +28,6 @@ int main(int argc, char **argv){
         if(!tmpCommands.size()){
             continue;
         }
-
         if(tmpCommands[0]==CONNECT){
             handleConnect(tmpCommands);
         } else if(tmpCommands[0]==DISCONNECT){

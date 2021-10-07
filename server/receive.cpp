@@ -36,7 +36,7 @@ void *recv_message(void *fd){
     int connFd=*(int*)fd;
     pthread_t recvTid=pthread_self();
     ss->addThreadId(connFd,recvTid);
-    printf("[server] accept a new connect, %s\n",ss->ss[connFd]->print().c_str());
+    printf("[server] accept a new isConnect, %s\n",ss->ss[connFd]->print().c_str());
     ss->unLock();
     while(true){
         char buf[MAXLINE];

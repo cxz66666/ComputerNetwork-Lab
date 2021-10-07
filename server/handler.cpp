@@ -92,6 +92,10 @@ bool handleSend(int connFd){
     }
 
     int socketFd= string2int(buf);
+
+    if(!receiveStopFlag(connFd)){
+        return false;
+    }
     ss->Lock();
 
     if(ss->ss.count(socketFd)){

@@ -3,4 +3,4 @@ services:
   server:
     image: network-lab:0.0.1 
     ports:
-      - "4611:4611" # API Port
+        - 4611:4611 # API Port

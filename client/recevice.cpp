@@ -7,7 +7,7 @@
 #include "data.h"
 #include "util.h"
 
-// use in all other receive fuctions to receive the STOPFLAG
+// use in all others receive function to receive the stop flag
 bool receiveStopFlag(int sockFd){
     char buf[2*STOPLENGTH];
     memset(buf,0,sizeof(buf));

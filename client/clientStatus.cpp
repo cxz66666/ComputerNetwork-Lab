@@ -5,12 +5,14 @@
 #include "clientStatus.h"
 #include "../config.h"
 #include "data.h"
+#include "recevice.h"
+
 clientStatus::clientStatus() {
     init();
 }
 
 bool clientStatus::setIpAndHost(const char *ip, int port) {
-    const char *defaultIP = "127.0.0.1";
+    const char *defaultIP = "127.0.0.1"; //just use for test!
 
     if(inet_pton(AF_INET,ip,&serverAddr.sin_addr)<=0){
         return false;
@@ -23,17 +25,19 @@ bool clientStatus::setIpAndHost(const char *ip, int port) {
 }
 
 bool clientStatus::hasConnected() {
-    return connect;
+    return isConnect;
 }
 
 void clientStatus::init() {
-    connect= false;
+    isConnect= false;
     bzero(&serverAddr,sizeof(serverAddr));
     serverAddr.sin_family=AF_INET;
+    sockFd=-1;
+    recvTid=-1;
 }
 string clientStatus::getServer() {
-    if(!connect) {
-        return "not connect to server yet!";
+    if(!isConnect) {
+        return "not isConnect to server yet!";
     } else {
         char buf[100];
         sprintf(buf,"ip:%s, port:%d",inet_ntoa(serverAddr.sin_addr), ntohs(serverAddr.sin_port));
@@ -42,8 +46,8 @@ string clientStatus::getServer() {
     return "";
 };
 void clientStatus::printNowStatus() {
-    if(!connect){
-        printf("[status] not connect yet!\n");
+    if(!isConnect){
+        printf("[status] not isConnect yet!\n");
     } else {
         printf("[status] connected! server ip: %s, port: %d\n",inet_ntoa(serverAddr.sin_addr), ntohs(serverAddr.sin_port));
     }
@@ -67,4 +71,33 @@ void clientStatus::initAndClose() {
     }
     sockFd=-1;
     recvTid=-1;
+}
+
+int clientStatus::sockFdCreate() {
+    sockFd= socket(AF_INET,SOCK_STREAM,0);
+    return sockFd;
+}
+
+int clientStatus::recvTidCreate(void *(*rec_message) (void *)) {
+    pthread_create(&recvTid,NULL,rec_message,&sockFd);
+    return recvTid;
+}
+
+int clientStatus::connectServer() {
+    return connect(sockFd, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
+}
+
+void clientStatus::disconnectServer() {
+    if(cs->hasConnected()){
+        if(recvTid>0){
+            pthread_cancel(recvTid);
+        }
+        if(sockFd>0){
+            close(sockFd);
+        }
+        init();
+    } else {
+        printf("[client] don't isConnect yet!\n");
+    }
+    return;
 }

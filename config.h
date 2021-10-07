@@ -39,7 +39,7 @@ const string HELP="help";
 
 const int TYPENUMBER=4;
 
-//connect 和 disconnect基本没用，此连接的时候非常简单，直接connect，关闭的时候则close套接字，对方就会发现recv长度为0，被动关闭
+//isConnect 和 disconnect基本没用，此连接的时候非常简单，直接connect，关闭的时候则close套接字，对方就会发现recv长度为0，被动关闭
 const int CONNECTNUMBER=1;
 const int DISCONNECTNUMBER=2;
 const int TIMENUMBER=3;

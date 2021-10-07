@@ -6,18 +6,25 @@
 #define COMPUTERNETWORK_LAB_CLIENTSTATUS_H
 
 #include <sys/socket.h>
-
+#include<sys/types.h>
 #include <netinet/in.h>
-
+#include <pthread.h>
 #include <arpa/inet.h>
 #include <string>
 #include <mutex>
 using namespace std;
 class clientStatus{
 public:
-    bool connect;
+    bool isConnect;
     sockaddr_in serverAddr;
     mutex csMutex;
+
+    //sockFd is the client socket number
+    int sockFd;
+    //recvTid is the thread to receive
+    pthread_t recvTid;
+
+
     clientStatus();
     //set the current ip and port to
     bool setIpAndHost(const char *ip,int port);
@@ -30,6 +37,18 @@ public:
     void printNowStatus();
     void Lock();
     void unLock();
+
+    //create the sockFd and return sockFd whether success or not
+    int sockFdCreate();
+
+    //try to isConnect to server with the sockFd and serverAddr
+    int connectServer();
+
+    //try to disconnect to server and free sockFd and thread
+    void disconnectServer();
+
+    //create the receiveThread use the function
+    int recvTidCreate(void *(*rec_message) (void *));
 
 };
 
