@@ -45,9 +45,10 @@ const int DISCONNECTNUMBER=2;
 const int TIMENUMBER=3;
 const int NAMENUMBER=4;
 const int LISTNUMBER=5;
-const int SENDNUMER=6;
-const int EXITNUMBER=7;
 
+const int EXITNUMBER=7;
+const int SENDNUMER_SENDER=8;
+const int SENDNUMER_RECEIVER=9;
 const string STOPFLAG="==+==";
 const int STOPLENGTH=STOPFLAG.size();
 

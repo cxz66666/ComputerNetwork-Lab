@@ -15,16 +15,15 @@ connectStatus::connectStatus() {
 
 }
 
-string connectStatus::toString() {
-    stringstream ss(ip);
-    ss<<' '<<port<<' '<<connFd<<' ';
-    return ss.str();
-}
 
 string connectStatus::print() {
-    char tmp[100];
-    sprintf(tmp,"%s:%04d, connectFd is %d",ip.c_str(),port,connFd);
-    return string(tmp);
+//    char tmp[100];
+//    sprintf(tmp,"%s:%04d, connectFd is %d",ip.c_str(),port,connFd);
+//    return string(tmp);
+
+    stringstream ss;
+    ss<<"connFd:"<<connFd<<"   address:"<<ip<<":"<<port<<"\n";
+    return ss.str();
 }
 
 
@@ -72,5 +71,14 @@ void serverStatus::addThreadId(int connFd,pthread_t tid) {
     } else {
         printf("[server] warning, add threadId to a not exist ID!\n");
     }
+}
+
+string serverStatus::getSnapshot() {
+    stringstream res;
+    res<<"Now have "<<ss.size()<<" clients connected\n";
+    for(auto m=ss.begin();m!=ss.end();m++){
+        res<<m->second->print();
+    }
+    return res.str();
 }
 

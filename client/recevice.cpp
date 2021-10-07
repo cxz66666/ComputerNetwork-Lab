@@ -38,7 +38,7 @@ bool receiveTime(int sockFd){
     }
 
     n=recv(sockFd,buf,length,0);
-    printf("[client] receive time %s , bytes number is %d\n",buf,n);
+    printf("[client] receive time: %s \n",buf);
 
     return receiveStopFlag(sockFd);
 }
@@ -58,7 +58,7 @@ bool receiveName(int sockFd){
     }
 
     n=recv(sockFd,buf,length,0);
-    printf("[client] receive name %s , bytes number is %d\n",buf,n);
+    printf("[client] receive name: %s\n",buf);
     return receiveStopFlag(sockFd);
 }
 
@@ -77,11 +77,11 @@ bool receiveList(int sockFd){
     }
 
     n=recv(sockFd,buf,length,0);
-    printf("[client] receive List %s , bytes number is %d\n",buf,n);
+    printf("[client] receive List following----\n%s\n",buf);
     return receiveStopFlag(sockFd);
 }
 
-bool receiveSend(int sockFd){
+bool receiveSendSender(int sockFd){
     char buf[MAXLINE];
     memset(buf,0,MAXLINE);
     int n;
@@ -96,10 +96,26 @@ bool receiveSend(int sockFd){
     }
 
     n=recv(sockFd,buf,length,0);
-    printf("[client] receive send %s , bytes number is %d\n",buf,n);
+    printf("[client] send message status: %s\n",buf);
     return receiveStopFlag(sockFd);
 }
-
+bool receiveSendReceiver(int sockFd){
+    char buf[MAXLINE];
+    memset(buf,0,MAXLINE);
+    int n;
+    if((n=recv(sockFd,buf,4,0))==-1){
+        printf("[client] receive error, error is %s\n", strerror(errno));
+    } else if(n==0){
+        printf("[client] receive empty from server, disconnect!\n");
+    }
+    int length= string2int(buf);
+    if(n<=0||length==0){
+        return false;
+    }
+    n=recv(sockFd,buf,length,0);
+    printf("[client] receive from client message: %s\n",buf);
+    return receiveStopFlag(sockFd);
+}
 
 void *recv_message(void *fd){
     int sockFdArgs=*(int*)fd;
@@ -137,8 +153,11 @@ void *recv_message(void *fd){
             case LISTNUMBER:
                 receiveList(sockFdArgs);
                 break;
-            case SENDNUMER:
-                receiveSend(sockFdArgs);
+            case SENDNUMER_SENDER:
+                receiveSendSender(sockFdArgs);
+                break;
+            case SENDNUMER_RECEIVER:
+                receiveSendReceiver(sockFdArgs);
                 break;
             default:
                 printf("[client] accept unknown type!\n");

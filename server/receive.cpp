@@ -64,7 +64,7 @@ void *recv_message(void *fd){
                     pthread_exit(0);
                 }
                 break;
-            case SENDNUMER:
+            case SENDNUMER_SENDER:
                 if(!handleSend(connFd)){
                     ss->Lock();
                     ss->closeConnect(connFd);

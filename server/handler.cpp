@@ -54,13 +54,66 @@ bool handleName(int connFd){
     string res=int2string(NAMENUMBER);
 
     string number=int2string(ss->serverName.size());
-    res+=number+ss->serverName;
+    res+=number+ss->serverName+STOPFLAG;
     send(connFd,res.c_str(),res.size(),0);
     return true;
 }
 bool handleList(int connFd){
+    if(!receiveStopFlag(connFd)){
+        return false;
+    }
 
+    ss->Lock();
+    string res= int2string(LISTNUMBER);
+    string snapshot=ss->getSnapshot();
+    res+= int2string(snapshot.size())+snapshot+STOPFLAG;
+    ss->unLock();
+    send(connFd,res.c_str(),res.size(),0);
+    return true;
 }
 bool handleSend(int connFd){
+    char buf[MAXLINE];
+    //这里先接收头部的长度
+    memset(buf,0,MAXLINE);
+    int n;
+    if((n=recv(connFd,buf,4,0))==-1){
+        printf("[server] receive error, error is %s\n", strerror(errno));
+    } else if(n==0){
+        printf("[server] receive empty from server, disconnect!\n");
+    }
+
+    int length= string2int(buf);
+    if(n<=0||length==0){
+        return false;
+    }
+
+    n=recv(connFd,buf,length,0);
+    if(n<=4){
+        return  false;
+    }
+
+    int socketFd= string2int(buf);
+    ss->Lock();
+
+    if(ss->ss.count(socketFd)){
+        //给接收方
+        string content(buf+4);
+        content="client status"+ss->ss[socketFd]->print()+content;
+        string res= int2string(SENDNUMER_RECEIVER)+ int2string(content.size())+content+STOPFLAG;
+        send(socketFd,res.c_str(),res.size(),0);
+
+        //给发送方
+        content="send success!";
+        res= int2string(SENDNUMER_SENDER)+ int2string(content.size())+content+STOPFLAG;
+        send(connFd,res.c_str(),res.size(),0);
+
+    } else {
+        const string content="Sorry don't have a client's connFd is"+char('0'+socketFd);
+        string res= int2string(SENDNUMER_SENDER)+int2string(content.size()) +content+STOPFLAG;
+        send(connFd,res.c_str(),res.size(),0);
+    }
+    ss->unLock();
+
+    return true;
 
 }

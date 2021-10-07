@@ -22,8 +22,7 @@ public:
 
     connectStatus();
 
-    //toString return a string contains all the information
-    string toString();
+    //print return a string contains all the information
     string print();
 };
 
@@ -49,6 +48,7 @@ public:
     void addConnect(int connFd,connectStatus*cs);
     //增加一个连接中的threadId
     void addThreadId(int connFd, pthread_t tid);
+    string getSnapshot();
 };
 
 

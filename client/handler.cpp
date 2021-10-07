@@ -163,7 +163,7 @@ void handleList(vector<string>&commands){
         cs->unLock();
         return;
     }
-    string sendStr=int2string(NAMENUMBER);
+    string sendStr=int2string(LISTNUMBER);
     sendStr+=STOPFLAG;
 
     send(sockFd,sendStr.c_str(), sendStr.size(),0);
@@ -172,11 +172,55 @@ void handleList(vector<string>&commands){
     return;
 }
 void handleSend(vector<string>&commands){
+    if(commands.size()<3){
+        printInlegalParam(LIST.c_str(),1,commands.size());
+        return;
+    }
+    int connNum= stoi(commands[1]);
+    if(connNum==0){
+        printf("[client] parse connectFd error!\n");
+        return;
+    }
+    cs->Lock();
+    if(!cs->hasConnected()){
+        printf("[client] don't connect yet!\n");
+        cs->unLock();
+        return;
+    }
+    //这个包的格式是 4bits type  4bits str.length （4bits connFd+content） 注意这个connFd长度包括在str.length内   STOPFLAG
+    string content;
+    for(int i=2;i<commands.size();i++){
+        content+=commands[i]+' ';
+    }
+    content= int2string(connNum)+content;
+    string sendStr= int2string(SENDNUMER_SENDER)+ int2string(content.size())+content+STOPFLAG;
+
+    send(sockFd,sendStr.c_str(), sendStr.size(),0);
+
+    cs->unLock();
+    return;
 
 }
 void handleExit(vector<string>&commands){
-
+    if(commands.size()>1){
+        printInlegalParam(EXIT.c_str(),1,commands.size());
+        return;
+    }
+    cs->Lock();
+    if(cs->hasConnected()){
+        if(recvTid>0){
+            pthread_cancel(recvTid);
+        }
+        if(sockFd>0){
+            close(sockFd);
+        }
+        printf("[client] disconnect!\n");
+    }
+    cs->unLock();
+    printf("[client] ByeBye!\n");
+    exit(0);
 }
 void handleHelp(vector<string>&commands){
-
+    printHelp();
+    return;
 }
