@@ -10,6 +10,7 @@
 #include <netinet/in.h>
 
 #include <arpa/inet.h>
+#include <string>
 #include <mutex>
 using namespace std;
 class clientStatus{
@@ -22,10 +23,14 @@ public:
     bool setIpAndHost(const char *ip,int port);
     bool hasConnected();
     void init();
+    void initAndClose();
+    //just print the
+    string getServer();
     //print now status
     void printNowStatus();
     void Lock();
     void unLock();
+
 };
 
 

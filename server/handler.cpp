@@ -26,7 +26,7 @@ bool receiveStopFlag(int connFd){
     if((n = recv(connFd , buf , STOPLENGTH , 0)) == -1){
         printf("[server] receive stopFlag, error is %s, disconnect!\n", strerror(errno));
     } else if(n==0){
-        printf("[server] receive empty from server, disconnect!\n");
+        printf("[server] receive empty from client %s, disconnect!\n",ss->ss[connFd]->print().c_str());
     }
     if(strcmp(STOPFLAG.c_str(),buf)==0){
         return true;
@@ -79,9 +79,8 @@ bool handleSend(int connFd){
     if((n=recv(connFd,buf,4,0))==-1){
         printf("[server] receive error, error is %s\n", strerror(errno));
     } else if(n==0){
-        printf("[server] receive empty from server, disconnect!\n");
+        printf("[server] receive empty from client %s , disconnect!\n",ss->ss[connFd]->print().c_str());
     }
-
     int length= string2int(buf);
     if(n<=0||length==0){
         return false;

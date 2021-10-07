@@ -4,6 +4,7 @@
 
 #include "clientStatus.h"
 #include "../config.h"
+#include "data.h"
 clientStatus::clientStatus() {
     init();
 }
@@ -30,7 +31,16 @@ void clientStatus::init() {
     bzero(&serverAddr,sizeof(serverAddr));
     serverAddr.sin_family=AF_INET;
 }
-
+string clientStatus::getServer() {
+    if(!connect) {
+        return "not connect to server yet!";
+    } else {
+        char buf[100];
+        sprintf(buf,"ip:%s, port:%d",inet_ntoa(serverAddr.sin_addr), ntohs(serverAddr.sin_port));
+        return string(buf);
+    }
+    return "";
+};
 void clientStatus::printNowStatus() {
     if(!connect){
         printf("[status] not connect yet!\n");
@@ -48,4 +58,13 @@ void clientStatus::Lock(){
 void clientStatus::unLock() {
     csMutex.unlock();
     return;
+}
+
+void clientStatus::initAndClose() {
+    cs->init();
+    if(sockFd>0){
+        close(sockFd);
+    }
+    sockFd=-1;
+    recvTid=-1;
 }

@@ -7,6 +7,7 @@
 #include "data.h"
 #include "util.h"
 
+// use in all other receive fuctions to receive the STOPFLAG
 bool receiveStopFlag(int sockFd){
     char buf[2*STOPLENGTH];
     memset(buf,0,sizeof(buf));
@@ -14,7 +15,7 @@ bool receiveStopFlag(int sockFd){
     if((n = recv(sockFd , buf , STOPLENGTH , 0)) == -1){
         printf("[server] receive stopFlag, error is %s, disconnect!\n", strerror(errno));
     } else if(n==0){
-        printf("[server] receive empty from server, disconnect!\n");
+        printf("[server] receive empty from server %s:, disconnect!\n",cs->getServer().c_str());
     }
     if(strcmp(STOPFLAG.c_str(),buf)==0){
         return true;
@@ -117,6 +118,32 @@ bool receiveSendReceiver(int sockFd){
     return receiveStopFlag(sockFd);
 }
 
+//just try to empty the buffer
+bool recoveryFromFail(int connFd){
+    printf("[client] An error occurred when receive! try to recovery it\n");
+    try{
+        char buf[MAXLINE+5];
+        int n;
+        n=recv(connFd,buf,MAXLINE,0);
+        if(n==0){
+            printf("[client] receive empty when recovery, try to disconnect\n");
+            return false;
+        }
+        if(n<0){
+            printf("[client] receive negative number when recovery, try to disconnect\n");
+            return false;
+        }
+        while(n==MAXLINE){
+            n=recv(connFd,buf,MAXLINE,0);
+        }
+    } catch(exception e){
+        printf("[client] This error can't be recovery, disconnect!\n");
+        return false;
+    }
+
+    return true;
+}
+
 void *recv_message(void *fd){
     int sockFdArgs=*(int*)fd;
 
@@ -132,10 +159,7 @@ void *recv_message(void *fd){
         //need to exit the thread
         if(n<=0){
             cs->Lock();
-            cs->init();
-            sockFd=-1;
-            recvTid=-1;
-            close(sockFdArgs);
+            cs->initAndClose();
             cs->unLock();
             pthread_exit(0);
         }
@@ -143,24 +167,41 @@ void *recv_message(void *fd){
         buf[n]='\0';
         int type=string2int(buf);
         printf("[client] receive %d type from server\n",type);
-        switch (type) {
-            case TIMENUMBER:
-                receiveTime(sockFdArgs);
-                break;
-            case NAMENUMBER:
-                receiveName(sockFdArgs);
-                break;
-            case LISTNUMBER:
-                receiveList(sockFdArgs);
-                break;
-            case SENDNUMER_SENDER:
-                receiveSendSender(sockFdArgs);
-                break;
-            case SENDNUMER_RECEIVER:
-                receiveSendReceiver(sockFdArgs);
-                break;
-            default:
-                printf("[client] accept unknown type!\n");
+        bool success=false;
+        try{
+            switch (type) {
+                case TIMENUMBER:
+                    success= receiveTime(sockFdArgs);
+                    break;
+                case NAMENUMBER:
+                    success= receiveName(sockFdArgs);
+                    break;
+                case LISTNUMBER:
+                    success= receiveList(sockFdArgs);
+                    break;
+                case SENDNUMER_SENDER:
+                    success= receiveSendSender(sockFdArgs);
+                    break;
+                case SENDNUMER_RECEIVER:
+                    success= receiveSendReceiver(sockFdArgs);
+                    break;
+                default:
+                    success=false;
+                    printf("[client] accept unknown type, try to recovery!\n");
+            }
+        } catch(exception e){
+            success=false;
+            printf("[client] An error occurred when receive content, try to recovery!\n");
+        }
+
+        if(!success){
+            //try to recovery, and if it failed, close and disconnect
+            if(!recoveryFromFail(sockFdArgs)){
+                cs->Lock();
+                cs->initAndClose();
+                cs->unLock();
+                pthread_exit(0);
+            }
         }
     }
 }

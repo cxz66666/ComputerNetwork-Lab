@@ -8,6 +8,30 @@
 #include "handler.h"
 #include "util.h"
 
+//just try to empty the buffer
+bool recoveryFromFail(int connFd){
+    printf("[server] An error occurred when receive! try to recovery it\n");
+    try{
+        char buf[MAXLINE+5];
+        int n;
+        n=recv(connFd,buf,MAXLINE,0);
+        if(n==0){
+            printf("[server] receive empty when recovery, try to disconnect\n");
+            return false;
+        }
+        if(n<0){
+            printf("[server] receive negative number when recovery, try to disconnect\n");
+            return false;
+        }
+        while(n==MAXLINE){
+            n=recv(connFd,buf,MAXLINE,0);
+        }
+    } catch(exception e){
+        printf("[server] This error can't be recovery, disconnect!\n");
+        return false;
+    }
+    return true;
+}
 void *recv_message(void *fd){
     int connFd=*(int*)fd;
     pthread_t recvTid=pthread_self();
@@ -21,7 +45,7 @@ void *recv_message(void *fd){
         if((n = recv(connFd , buf , TYPENUMBER , 0)) == -1){
             printf("[server] receive error, error is %s, disconnect!\n", strerror(errno));
         } else if(n==0){
-            printf("[server] receive empty from server, disconnect!\n");
+            printf("[server] receive empty from client %s , disconnect!\n",ss->ss[connFd]->print().c_str());
         }
         if(n<=0){
             ss->Lock();
@@ -35,46 +59,41 @@ void *recv_message(void *fd){
             printf("[server] warning, type=0 is not legal\n");
         }
         printf("[server] accept Client request, type is %d\n",type);
+        int success=false;
         switch (type) {
             case CONNECTNUMBER:
+                success=false;
                 break;
             case DISCONNECTNUMBER:
+                success=false;
                 break;
             case TIMENUMBER:
-                if(!handleTime(connFd)){
-                    ss->Lock();
-                    ss->closeConnect(connFd);
-                    ss->unLock();
-                    pthread_exit(0);
-                }
+                success=handleTime(connFd);
                 break;
             case NAMENUMBER:
-                if(!handleName(connFd)){
-                    ss->Lock();
-                    ss->closeConnect(connFd);
-                    ss->unLock();
-                    pthread_exit(0);
-                }
+                success= handleName(connFd);
                 break;
             case LISTNUMBER:
-                if(!handleList(connFd)){
-                    ss->Lock();
-                    ss->closeConnect(connFd);
-                    ss->unLock();
-                    pthread_exit(0);
-                }
+                success= handleList(connFd);
                 break;
             case SENDNUMER_SENDER:
-                if(!handleSend(connFd)){
-                    ss->Lock();
-                    ss->closeConnect(connFd);
-                    ss->unLock();
-                    pthread_exit(0);
-                }
+                success= handleSend(connFd);
+
                 break;
             default:
+                success=false;
                 printf("[server] accept a not legal type from %d, exit receive thread\n",connFd);
                 break;
+        }
+
+        if(!success){
+            if(!recoveryFromFail(connFd)){
+                ss->Lock();
+                ss->closeConnect(connFd);
+                ss->unLock();
+                pthread_exit(0);
+            }
+
         }
     }
 }
