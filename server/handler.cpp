@@ -39,12 +39,19 @@ bool handleTime(int connFd){
     if(!receiveStopFlag(connFd)){
         return false;
     }
-    string res= int2string(TIMENUMBER);
-    string time=getNowTime();
-    string number= int2string(time.size());
-    res+=number+time+STOPFLAG;
+//    string res= int2string(TIMENUMBER);
+//    string time=getNowTime();
+//    string number= int2string(time.size());
+//    res+=number+time+STOPFLAG;
 
-    send(connFd,res.c_str(),res.size(),0);
+
+    for(int i=0;i<100;i++){
+        string res= int2string(TIMENUMBER);
+        string time=getNowTime();
+        string number= int2string(time.size());
+        res+=number+time+STOPFLAG;
+        send(connFd,res.c_str(),res.size(),0);
+    }
     return true;
 }
 bool handleName(int connFd){
