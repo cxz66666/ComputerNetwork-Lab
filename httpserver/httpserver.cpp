@@ -36,12 +36,19 @@ void handleConnect(int cfd) {
     string httpRequest;
     while (true) {
         int size = recv(cfd, buffer, MAXBUFFER, 0);
+        cout << size << endl;
+        if (size <= 0) {
+            close(cfd);
+            return;
+        }
+
         httpRequest.append(buffer, buffer + size);
         if (size < MAXBUFFER) {
             break;
         }
     }
     string reply = replyRequest(httpRequest);
+//    cout << reply.size() << " " << reply << endl;
     send(cfd, reply.c_str(), reply.size(), 0);
     close(cfd);
     //这里close交给父函数去处理
@@ -59,7 +66,7 @@ string replyRequest(const string &request) {
     string type = words[0];
     string path = words[1];
     string http = words[2];
-
+    cout << type << " " << path << " " << http << endl;
     if (type == GET) {
         ans = get(path, http);
     } else if (type == POST) {
@@ -93,6 +100,8 @@ string get(const string &path, const string &http) {
     } else {
         contentType = "text/html";
     }
+//    cout << fileData << endl;
+//    cout << contentType << endl;
     return makeHttpReply(fileData, 200, contentType);
 }
 
@@ -103,14 +112,22 @@ string post(const string &path, const string &http, const string &data) {
     cout << data << endl;
     cout << path << endl;
     int nowIndex = 0;
-    int t;
+    int t = 0;
     map<string, string> mp;
-    while (nowIndex < data.size() && (t = data.find("&", nowIndex)) != string::npos) {
+    while (nowIndex < data.size()) {
         string tmpKey, tmpValue;
-        tmpKey = data.substr(nowIndex, data.find("="));
-        tmpValue = data.substr(data.find("=") + 1, t);
+        tmpKey = data.substr(nowIndex, data.find("=", nowIndex) - nowIndex);
+        if ((t = data.find("&", nowIndex)) == string::npos) {
+            tmpValue = data.substr(data.find("=", nowIndex) + 1);
+            mp[tmpKey] = tmpValue;
+            cout << tmpKey << " " << tmpValue << endl;
+            break;
+        }
+        tmpValue = data.substr(data.find("=", nowIndex) + 1, t - data.find("=", nowIndex) - 1);
         nowIndex = t + 1;
         mp[tmpKey] = tmpValue;
+        cout << tmpKey << " " << tmpValue << endl;
+
     }
     if (mp["login"] == USRENAME && mp["pass"] == PASSWORD) {
         return makeHttpReply("<html><body>Login Success</body></html>", 200);
